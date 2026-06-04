@@ -1,7 +1,11 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Queue;
 import java.util.Stack;
 
-class main{
+public class genericTree{
     private static class Node{
         int data;
         ArrayList<Node> children=new ArrayList<>();
@@ -80,12 +84,75 @@ class main{
         }
         return max;
     }
+    public static int height(Node n){
+        // the logic here is very interesting
+        // we are counting height from edges
+        int ht=-1;
+        for(Node node:n.children){
+            int ch=height(node);
+            ht=Math.max(ht,ch);
+        }
+        ht++;
+        // ht++ is very important here as it makes the the change in height for the current node adding 1 to it.
+        // therefore making the height of that node from the deepest leaf that it has to offer accurate as
+        // this +1 considers the edge between the parent node at that instance to the child node at that instance.
+        return ht;
+    }
     // max through pep kcoding
     // uploading it on git with the nessecary info
     // height counting and 3 more problems
+    public static void traversals(Node node){
+        System.out.println("Node Pre "+node.data);
+        int parentData=node.data;
+        for(Node n:node.children){
+            System.out.println("Edge Pre "+parentData+" --> "+n.data);
+            // System.out.println("Pre Node "+n.data);
+            traversals(n);
+            System.out.println("Edge Post "+parentData+" --> "+n.data);
+        }
+        // now the post part of it
+        System.out.println("Node Post "+node.data);
+    }
+    public static void levelOrderTraversal(Node node){
+        Queue<Node> q=new ArrayDeque<>();
+        q.add(node);
+        // adding the root node
+        // System.out.println();
+        while(!q.isEmpty()){
+            Node val=q.remove();
+            System.out.print(val.data+" ");
+            for(Node x:val.children){
+                q.add(x);
+            }
+        }
+        System.out.print(".");
+    }
+    public static void levelOrderTraversalLine(Node node){
+        Queue<Node> parent=new ArrayDeque<>();
+        Queue<Node> child=new ArrayDeque<>();
+        parent.add(node);
+        while(!parent.isEmpty()||!child.isEmpty()){
+            Node val=parent.remove();
+            System.out.print(val.data+" ");
+            for(Node x:val.children){
+                child.add(x);
+            }
+            if(parent.isEmpty()){
+                System.out.println();
+                // parent.addAll(child);
+                // child.clear();
+                // or 
+                parent=child;
+                child=new ArrayDeque<>();
+                // the one above or is comparatively worse option as addAll has time compleixity of O(k)
+                // whereas parent=child makes it just address allocation which makes the complexity as O(1)
+            }
+        }
+        // System.out.print(".");
+    }
     public static void main(String[] args){
         // ArrayList<Node> n=new ArrayList<>();
-        int[] arr={10,20,50,-1,60,-1,-1,70,-1,80,110,-1,120,-1,-1,40,100,-1,-1,-1};
+        int[] arr={10,20,-1,30,50,-1,60,-1,-1,40,-1,-1};
         Node temp= construct(arr);
         Display(temp);
         System.out.println(size1(temp,true));
@@ -96,5 +163,12 @@ class main{
         // System.out.println(size1(temp1,true));
         // now calculating size without using boolean;
         System.out.println(max1(temp));
+        System.out.println(height(temp));
+        // traversals(temp);
+        levelOrderTraversal(temp);
+        System.out.println();
+        levelOrderTraversalLine(temp);
     }
 }
+// IMP - the only cases where these methods dont work is wheere you have not been provided any tree and for that
+// you have to include an if statment of a null tee in every method.
