@@ -1,5 +1,7 @@
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Queue;
@@ -57,6 +59,7 @@ public class genericTree{
             reset=false;
         }
         sizeOfGenericTree++;
+        System.out.println(sizeOfGenericTree);
         for(Node node:root.children){
             size1(node,reset);
         }
@@ -148,26 +151,150 @@ public class genericTree{
                 // whereas parent=child makes it just address allocation which makes the complexity as O(1)
             }
         }
+        
         // System.out.print(".");
+    }
+    public static void zigzagTraversal(Node node){
+        Stack<Node> main=new Stack<>();
+        Stack<Node> child=new Stack<>();
+        main.push(node);
+        while(main.size()!=0||child.size()!=0){
+            Node temp=main.pop();
+            System.out.print(temp.data+" , ");
+            for(Node x:temp.children){
+                child.push(x);
+            }
+            if(main.size()==0){
+                System.out.println();
+                main=child;
+                child=new Stack<>();
+            }
+        }
+    } 
+    // check this once
+    public static void mirrorNode1(Node root){
+        Stack<Node> temp=new Stack<>();
+        for(Node x:root.children){
+            temp.push(x);
+        }
+        ArrayList<Node> child1=new ArrayList<>();
+        while(temp.size()!=0){
+            child1.add(temp.pop());
+        }
+        root.children=child1;
+        for(Node x:root.children){
+            mirrorNode1(x);
+        }
+    }
+    public static void mirrorNode2(Node root){
+        for(Node x:root.children){
+            mirrorNode2(x);
+        }
+        Collections.reverse(root.children);
+        // in arraylist you could directly apply the reversal from Collections
+    }
+    public static boolean removeLeafNode1(Node root){
+        boolean inLoop=false;
+        ArrayList<Node> temp=(ArrayList)root.children.clone();
+        // so before this we tried two apporaches first one was directly making chnages in the root.children node 
+        // the mistake in that was if leaf node was removed then the iteration for the next root would be skipped as it would move a index ahead.
+        // then we tried ArrayList temp=root.children;
+        // the same issue as here temp just refers to the same address as root.children
+        // so we use clone so that temp refers to a new arraylist (copy of the original one) but the changes in the original does not affect it
+        // although i think here the time and space complexity will be messed up as 
+        // time complexity - O(N2) but in ideal case it should be O(N)
+        for(Node x:temp){
+            inLoop=true;
+            boolean cLoop=removeLeafNode1(x);
+            // System.out.println("For the value "+x.data+" the value of cloop is "+cLoop);
+            if(cLoop==false){
+                // System.out.println("Hello --> "+x.data);
+                root.children.remove(x);
+
+            }
+        }
+        return inLoop;
+    }
+    // The better apporach is the nect one 
+    public static void removeLeafNode2(Node root){
+        // we order the parent of each node to remove the childs 
+        for(int i=root.children.size()-1;i>=0;i--){
+            // from the last to qaavoid skipping any nodes here
+            Node child=root.children.get(i);
+            if(child.children.size()==0){
+                // that means it is the leaf node
+                root.children.remove(child);
+            }
+        }
+        //the remove child part should come beofre otherwise it will also remove extra nodes which were not leaf earlier.. 
+        for(Node x:root.children){
+            removeLeafNode2(x);
+        }
+        // for(int i=root.children.size()-1;i>=0;i--){
+        //     // from the last to avoid skipping any nodes here
+        //     Node child=root.children.get(i);
+        //     if(child.children.size()==0){
+        //         // that means it is the leaf node
+        //         root.children.remove(child);
+        //     }
+        // }
+        // this is incorrect as it also removes the nodes that bacome leaf in the future
+    }
+    public static void linearize1(Node root){
+       for(Node x:root.children){
+         linearize1(x);
+       }
+    //    System.out.println(root.data);
+        // now it reaches the leaf nodes first 
+        while(root.children.size()>1){
+            Node last=root.children.remove(root.children.size()-1);
+            Node secondLast=root.children.get(root.children.size()-1);
+            // secondLast.children.add(last);
+            // System.out.println("1. -->"+secondLast.data);
+            Node toBeConnected=getTail(secondLast);
+            toBeConnected.children.add(last);
+            // System.out.println(secondLast.children.get(0).data);
+
+            // this will linearize all the nodes except the root node where it wont give us the structure we want.
+        }
+        // now everything before the root node has been linearized but to get the structure we want we have to connect every tail of second level height 
+        // nodes to the first node of the second linearized branch
+        //the only thing that has not been balanced here is rooot node so it can have size>1
+    }
+    private static Node getTail(Node root){
+        while(root.children.size()==1){
+            root=root.children.get(0);
+        }
+        return root;
+        // System.out.println(root.data);
+        // there is some fundamentma; mistake in the recursion happening here clear it and add to notes
     }
     public static void main(String[] args){
         // ArrayList<Node> n=new ArrayList<>();
-        int[] arr={10,20,-1,30,50,-1,60,-1,-1,40,-1,-1};
+        int[] arr={10,20,50,-1,60,-1,-1,30,70,-1,80,110,-1,120,-1,-1,90,-1,-1,40,100,-1,-1,-1};
         Node temp= construct(arr);
-        Display(temp);
-        System.out.println(size1(temp,true));
-        System.out.println(size2(temp));
+        // zigzagTraversal(temp);
+        // Display(temp);
+        // System.out.println(size1(temp,true));
+        // System.out.println(size1(temp,true));
+        // System.out.println(size2(temp));
         // int[] arr1={10,20,50,-1,60,-1,-1,70,-1,80,110,-1,120,-1,-1,40,100,-1,-1,-1};
         //   Node temp1= construct(arr);
         // // Display(temp1);
         // System.out.println(size1(temp1,true));
         // now calculating size without using boolean;
-        System.out.println(max1(temp));
-        System.out.println(height(temp));
+        // System.out.println(max1(temp));
+        // System.out.println(height(temp));
         // traversals(temp);
-        levelOrderTraversal(temp);
-        System.out.println();
-        levelOrderTraversalLine(temp);
+        // levelOrderTraversal(temp);
+        // System.out.println();
+        // levelOrderTraversalLine(temp);
+        // mirrorNode1(temp);
+        // Display(temp);
+        // boolean x=removeLeafNode1(temp);
+        // removeLeafNode2(temp);
+        linearize1(temp);
+        Display(temp);
     }
 }
 // IMP - the only cases where these methods dont work is wheere you have not been provided any tree and for that
