@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 
 public class genericTree {
@@ -357,12 +359,92 @@ public class genericTree {
         return sol;
     }
     // exact same solution as pep coding so perfectly doneee 🥳
-
+    public static int lowestCommonAncestor1(Node root,int t1,int t2){
+        ArrayList<Integer> a1=nodeToRootPath1(root, t1);
+        ArrayList<Integer> a2=nodeToRootPath1(root, t2);
+        int i=((a1.size()<a2.size())?a1.size():a2.size());
+        int size1=a1.size();
+        int size2=a2.size();
+        int ans=-1;
+        while(i>0){
+            int val1=a1.get(size1-1);
+            int val2=a2.get(size2-1);
+            if(val1==val2){
+                ans=val1;
+            }
+            size1--;
+            size2--;
+            i--;
+        }
+        return ans;
+    }
+    // again the exact solution
+    public static int distanceBetweenNodes(Node root,int t1,int t2){
+        ArrayList<Integer> a1=nodeToRootPath1(root, t1);
+        ArrayList<Integer> a2=nodeToRootPath1(root, t2);
+        int commonLowestAncestor=lowestCommonAncestor1(root, t1, t2);
+        int p1=0;
+        int p2=0;
+        for(int i=0;i<a1.size();i++){
+            if(commonLowestAncestor==a1.get(i)){
+                p1=i;
+            }
+        }
+        for(int i=0;i<a2.size();i++){
+            if(commonLowestAncestor==a2.get(i)){
+                p2=i;
+            }
+        }
+        return p1+p2;
+    }
+    public static boolean sameStructure(Node root1,Node root2){
+        boolean ans=true;
+        int index=0;
+        int temp1=root1.children.size();
+        int temp2=root2.children.size();
+        while(temp1>0||temp2>0){
+            if(root1.children.size()==root2.children.size()){
+                boolean Lans=sameStructure(root1.children.get(index), root2.children.get(index));
+                index++;
+                temp1--;
+                temp2--;
+                if(!Lans){
+                ans=false;
+                return ans;
+             }
+            }
+            else{
+                return false;
+            }   
+        }
+        return ans;
+    }
+    // here the main problem was running two loops together
+    // pep coding had somewhat of a clear solution for this 
+    public static boolean sameStructure1(Node root1,Node root2){
+        if(root1.children.size()!=root2.children.size()){
+            return false;
+        }
+        for(int i=0;i<root1.children.size();i++){
+            Node c1=root1.children.get(i);
+            Node c2=root2.children.get(i);
+            if(sameStructure1(c1, c2)==false){
+                return false;
+                // creates a euler path
+            }
+        }
+        return true;
+    }
+    // both have the same time and space complexity just one uses while loop and the other uses for loop
     public static void main(String[] args) {
         // ArrayList<Node> n=new ArrayList<>();
         int[] arr = { 10, 20, 50, -1, 60, -1, -1, 30, 70, -1, 80, 110, -1, 120, -1, -1, 90, -1, -1, 40, 100, -1, -1,
                 -1 };
         Node temp = construct(arr);
+        int[] arr1={10,20,40,-1,50,-1,-1,30,-1,-1};
+        Node temp1=construct(arr1);
+        int[] arr2={10,20,-1,30,40,-1,50,-1,-1};
+        Node temp2=construct(arr2);        
         // zigzagTraversal(temp);
         // Display(temp);
         // System.out.println(size1(temp,true));
@@ -387,9 +469,17 @@ public class genericTree {
         // linearize2(temp);
         // Display(temp);
         // boolean isThere=findElement1(temp, 110);
-        ArrayList sol=nodeToRootPath1(temp,110);
+        // ArrayList sol1=nodeToRootPath1(temp,70);
+        // ArrayList sol2=nodeToRootPath1(temp,120);
+        // System.out.println(sol1);
+        // System.out.println(sol2);
+        // here 30 is the common ancestor
+        // int x=lowestCommonAncestor1(temp, 10, 120);
+        // -1 as the answer here simply means one of the element is not on the tree
         // it prints the necessary euler path
-        System.out.println(sol);
+        // int x=distanceBetweenNodes(temp, 80, 120);
+        boolean x=sameStructure1(temp1, temp2);
+        System.out.println(x);
     }
 }
 // IMP - the only cases where these methods dont work is wheere you have not
